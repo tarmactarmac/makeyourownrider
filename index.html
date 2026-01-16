@@ -3,65 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Road Bike Roster Draft</title>
+    <title>TDF 2025 Pro Rider Draft</title>
     <style>
-        body { background: #0a0a0a; color: white; font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 50px; }
-        h1 { font-size: 3rem; color: #ff3e3e; margin: 0; letter-spacing: -1px; }
-        p { color: #666; margin-top: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; max-width: 1100px; }
-        .card { background: #151515; border: 1px solid #222; border-radius: 24px; padding: 40px 20px; text-align: center; transition: 0.3s; position: relative; }
-        .card.active { border-color: #ff3e3e; box-shadow: 0 0 20px rgba(255, 62, 62, 0.2); }
-        .label { font-size: 0.75rem; color: #ff3e3e; font-weight: 800; letter-spacing: 2px; margin-bottom: 20px; }
-        .value { font-size: 1.5rem; font-weight: 700; min-height: 100px; display: flex; align-items: center; justify-content: center; line-height: 1.3; transition: 0.1s; }
-        .btn-draw { margin-top: 60px; padding: 22px 80px; font-size: 1.4rem; font-weight: 900; color: white; background: #ff3e3e; border: none; border-radius: 100px; cursor: pointer; transition: 0.3s; }
-        .btn-draw:hover { background: #ff5e5e; transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255, 62, 62, 0.4); }
-        .btn-draw:disabled { background: #333; cursor: not-allowed; transform: none; }
-        .rolling { opacity: 0.5; filter: blur(2px); transform: scale(0.95); }
+        :root { --primary: #ff3e3e; --tdf-yellow: #ffcf40; --s-rank: #ffcf40; --a-rank: #e2e2e2; --b-rank: #cd7f32; }
+        body { background: #000; color: white; font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 15px; overflow-x: hidden; }
+        
+        .header h1 { font-size: 1.6rem; color: var(--tdf-yellow); margin: 20px 0; text-transform: uppercase; font-weight: 900; letter-spacing: -1px; text-shadow: 0 0 10px rgba(255, 207, 64, 0.5); }
+
+        /* 결과 요약 박스 */
+        .total-rank-box { margin-bottom: 25px; padding: 15px 30px; border-radius: 20px; background: #1a1a1a; border: 2px solid #333; text-align: center; display: none; width: 100%; max-width: 500px; box-sizing: border-box; }
+        .total-rank-value { font-size: 2.2rem; font-weight: 900; margin-bottom: 5px; font-style: italic; }
+        .total-rank-desc { font-size: 0.95rem; color: var(--tdf-yellow); font-weight: 600; }
+
+        /* 4개 카드 그리드 (2x2 구성) */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 800px; }
+        .card { background: linear-gradient(145deg, #151515, #0a0a0a); border: 2px solid #222; border-radius: 18px; padding: 15px; text-align: center; position: relative; transition: all 0.3s; display: flex; flex-direction: column; justify-content: center; height: 140px; box-sizing: border-box; overflow: hidden; }
+        .card.active { border-color: #444; }
+        .card.s-win { border-color: var(--s-rank); box-shadow: 0 0 30px rgba(255, 207, 64, 0.4); animation: shake 0.4s ease-in-out; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .label { font-size: 0.7rem; color: #666; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
+        .brand-text { font-size: 0.75rem; color: #888; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; display: block; }
+        .value { font-size: 1rem; font-weight: 800; line-height: 1.3; color: #fff; word-break: keep-all; min-height: 3em; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        .rank-badge { position: absolute; top: 12px; right: 12px; font-size: 0.7rem; font-weight: 900; padding: 4px 10px; border-radius: 6px; display: none; z-index: 10; }
+        .rolling { opacity: 0.3; filter: blur(3px); }
+        .text-S { color: var(--s-rank); font-weight: 900; text-shadow: 0 0 10px rgba(255, 207, 64, 0.5); }
+        .blink-text { animation: flash 0.5s infinite alternate; }
+        @keyframes flash { from { opacity: 0.6; } to { opacity: 1; } }
+
+        /* 버튼 스타일 */
+        .btn-draw { margin-top: 40px; padding: 20px 100px; font-size: 1.6rem; font-weight: 900; color: #000; background: var(--tdf-yellow); border: none; border-radius: 100px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(255, 207, 64, 0.3); }
+        .btn-draw:hover { transform: scale(1.05); }
+        .btn-draw:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; }
+
+        /* 등급별 색상 */
+        .rank-S { background: var(--s-rank); color: #000; }
+        .rank-A { background: var(--a-rank); color: #000; }
+        .rank-B { background: var(--b-rank); color: #fff; }
+
+        /* 하단 로스터 리스트 */
+        .data-viewer { margin-top: 50px; width: 100%; max-width: 1000px; padding: 0 10px; box-sizing: border-box; }
+        .roster-toggle-btn { width: 100%; background: #111; border: 1px solid #333; color: #888; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: 800; display: flex; justify-content: center; align-items: center; }
+        .roster-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #080808; border-radius: 0 0 12px 12px; }
+        .data-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 20px; }
+        .data-column h3 { font-size: 0.8rem; color: var(--tdf-yellow); border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
+        .data-list { font-size: 0.7rem; color: #aaa; max-height: 400px; overflow-y: auto; }
+        .data-item { display: flex; justify-content: space-between; border-bottom: 1px solid #1a1a1a; padding: 6px 0; }
+        .rank-S-txt { color: var(--s-rank); font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: 1fr; }
+            .data-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>ROSTER DRAFT</h1>
-        <p>당신만의 로드바이크 조합을 생성하세요</p>
+    <div class="header"><h1>2025 TOUR DE FRANCE DRAFT</h1></div>
+    
+    <div id="total-rank" class="total-rank-box">
+        <div class="total-rank-value" id="rank-val">-</div>
+        <div id="rank-desc" class="total-rank-desc">-</div>
     </div>
+
     <div class="grid">
-        <div class="card" id="c1"><div class="label">FRAME</div><div class="value" id="f">---</div></div>
-        <div class="card" id="c2"><div class="label">GROUPSET</div><div class="value" id="g">---</div></div>
-        <div class="card" id="c3"><div class="label">WHEELSET</div><div class="value" id="w">---</div></div>
+        <div class="card" id="card-r"><div class="rank-badge" id="r-r"></div><div class="label">Pro Rider</div><div class="value" id="rider">---</div></div>
+        <div class="card" id="card-f"><div class="rank-badge" id="r-f"></div><div class="label">Frame</div><div class="value" id="frame">---</div></div>
+        <div class="card" id="card-w"><div class="rank-badge" id="r-w"></div><div class="label">Wheelset</div><div class="value" id="wheel">---</div></div>
+        <div class="card" id="card-g"><div class="rank-badge" id="r-g"></div><div class="label">Groupset</div><div class="value" id="group">---</div></div>
     </div>
-    <button class="btn-draw" onclick="run()">DRAFT START</button>
+
+    <button class="btn-draw" onclick="run()">OPEN PACK</button>
+
+    <div class="data-viewer">
+        <button class="roster-toggle-btn" onclick="toggleRoster()">VIEW ALL DATABASE</button>
+        <div id="roster-content" class="roster-content">
+            <div class="data-grid">
+                <div class="data-column"><h3>RIDERS (<span id="count-r">0</span>)</h3><div id="list-r" class="data-list"></div></div>
+                <div class="data-column"><h3>FRAMES (<span id="count-f">0</span>)</h3><div id="list-f" class="data-list"></div></div>
+                <div class="data-column"><h3>WHEELS (<span id="count-w">0</span>)</h3><div id="list-w" class="data-list"></div></div>
+                <div class="data-column"><h3>GROUPSET (<span id="count-g">0</span>)</h3><div id="list-g" class="data-list"></div></div>
+            </div>
+        </div>
+    </div>
 
     <script>
+        
         const data = {
-            f: ["Specialized S-Works Tarmac SL8", "Trek Madone SLR Gen 7", "Canyon Aeroad CFR", "Pinarello Dogma F", "Cervelo S5 V3", "Colnago V4Rs", "Giant Propel Advanced SL", "Cannondale SuperSix EVO", "BMC Teammachine SLR01", "Scott Foil RC", "Factor OSTRO VAM", "Bianchi Oltre RC", "Merida Reacto Team", "Wilier Filante SLR", "Lapierre Aircode DRS", "Look 795 Blade RS", "Argon 18 Nitrogen", "Ridley Noah Fast", "Orbea Orca Aero", "Cervelo R5", "Specialized Aethos", "Trek Emonda SLR", "Giant TCR SL", "Canyon Ultimate CFR", "Colnago C68", "Bianchi Specialissima", "Chapter2 TOA", "Basso Diamante SV", "Pinarello Prince", "Cannondale SystemSix", "BMC Roadmachine", "Scott Addict RC", "Merida Scultura", "Factor O2 VAM", "Enve Melee", "Dare VSRu", "Rose Xlite 06", "Canyon Endurace CF SLX", "Specialized Roubaix SL8", "Trek Domane SLR", "Giant Defy SL"],
-            g: ["Shimano Dura-Ace R9270 Di2", "Shimano Ultegra R8170 Di2", "SRAM RED AXS (2024)", "SRAM Force AXS", "Campagnolo Super Record Wireless", "Shimano Dura-Ace R9170 Di2", "SRAM Red eTap AXS", "Shimano 105 R7170 Di2", "Campagnolo Super Record EPS", "SRAM Rival AXS", "Shimano Ultegra R8070 Di2", "SRAM Force eTap", "Campagnolo Super Record 12s", "Campagnolo Record", "SRAM Red 22"],
-            w: ["Roval Rapide CLX II", "Zipp 454 NSW", "Bora Ultra WTO 45", "Shimano Dura-Ace C50", "ENVE SES 4.5", "Cadex 50 Ultra", "Princeton Wake 6560", "DT Swiss ARC 1100", "Reserve 52/63", "Hunt 54 Aero", "Black Inc Sixty", "Mavic Cosmic SLR 45", "Roval Alpinist CLX", "Zipp 303 Firecrest", "Bora WTO 60", "Vision Metron 60 SL", "FFWD RYOT55", "HED Vanquish RC6", "Aviav Adeon", "FarSports Ventoux S"]
+
+            r: [
+                {b:"UAE Team Emirates", n:"Tadej Pogačar", r:"S"}, {b:"UAE Team Emirates", n:"Adam Yates", r:"A"}, {b:"UAE Team Emirates", n:"João Almeida", r:"A"},
+                {b:"Visma-Lease a Bike", n:"Jonas Vingegaard", r:"S"}, {b:"Visma-Lease a Bike", n:"Matteo Jorgenson", r:"A"}, {b:"Visma-Lease a Bike", n:"Wout van Aert", r:"S"},
+                {b:"Soudal Quick-Step", n:"Remco Evenepoel", r:"S"}, {b:"Soudal Quick-Step", n:"Mikel Landa", r:"A"},
+                {b:"Red Bull-BORA-hansgrohe", n:"Primož Roglič", r:"S"}, {b:"Red Bull-BORA-hansgrohe", n:"Jai Hindley", r:"A"},
+                {b:"INEOS Grenadiers", n:"Carlos Rodriguez", r:"A"}, {b:"INEOS Grenadiers", n:"Tom Pidcock", r:"A"}, {b:"INEOS Grenadiers", n:"Egan Bernal", r:"A"},
+                {b:"Lidl-Trek", n:"Mads Pedersen", r:"A"}, {b:"Lidl-Trek", n:"Tao Geoghegan Hart", r:"A"},
+                {b:"Alpecin-Deceuninck", n:"Mathieu van der Poel", r:"S"}, {b:"Alpecin-Deceuninck", n:"Jasper Philipsen", r:"S"},
+                {b:"EF Education-EasyPost", n:"Richard Carapaz", r:"A"}, {b:"EF Education-EasyPost", n:"Ben Healy", r:"B"},
+                {b:"Groupama-FDJ", n:"David Gaudu", r:"A"}, {b:"Decathlon AG2R", n:"Felix Gall", r:"A"}, {b:"Movistar Team", n:"Enric Mas", r:"A"}
+            ],
+            f: [
+                // Specialized
+                {b:"Specialized", n:"S-Works Tarmac SL8", r:"S"}, {b:"Specialized", n:"S-Works Aethos", r:"S"}, {b:"Specialized", n:"S-Works Roubaix SL8", r:"S"}, {b:"Specialized", n:"S-Works Shiv TT", r:"S"}, {b:"Specialized", n:"Tarmac SL8 Pro", r:"A"}, {b:"Specialized", n:"Aethos Pro", r:"A"}, {b:"Specialized", n:"Roubaix SL8 Expert", r:"A"}, {b:"Specialized", n:"Allez Sprint", r:"B"}, {b:"Specialized", n:"Allez E5", r:"C"},
+                // Trek
+                {b:"Trek", n:"Madone SLR 9 Gen 8", r:"S"}, {b:"Trek", n:"Emonda SLR 9", r:"S"}, {b:"Trek", n:"Domane SLR 9", r:"S"}, {b:"Trek", n:"Madone SL 7", r:"A"}, {b:"Trek", n:"Emonda SL 7", r:"A"}, {b:"Trek", n:"Domane SL 7", r:"A"}, {b:"Trek", n:"Emonda SL 5", r:"B"}, {b:"Trek", n:"Domane AL 2", r:"C"},
+                // Canyon
+                {b:"Canyon", n:"Aeroad CFR", r:"S"}, {b:"Canyon", n:"Ultimate CFR", r:"S"}, {b:"Canyon", n:"Endurace CFR", r:"S"}, {b:"Canyon", n:"Speedmax CFR", r:"S"}, {b:"Canyon", n:"Aeroad CF SLX", r:"A"}, {b:"Canyon", n:"Ultimate CF SLX", r:"A"}, {b:"Canyon", n:"Endurace CF SLX", r:"A"}, {b:"Canyon", n:"Aeroad CF SL", r:"B"}, {b:"Canyon", n:"Ultimate CF SL", r:"B"}, {b:"Canyon", n:"Endurace AL", r:"C"},
+                // Cervelo
+                {b:"Cervelo", n:"S5", r:"S"}, {b:"Cervelo", n:"R5", r:"S"}, {b:"Cervelo", n:"P5", r:"S"}, {b:"Cervelo", n:"Soloist", r:"A"},
+                // Pinarello
+                {b:"Pinarello", n:"Dogma F", r:"S"}, {b:"Pinarello", n:"Dogma X", r:"S"}, {b:"Pinarello", n:"F7", r:"A"}, {b:"Pinarello", n:"X7", r:"B"}, {b:"Pinarello", n:"Prince", r:"B"},
+                // Colnago
+                {b:"Colnago", n:"Y1Rs", r:"S"}, {b:"Colnago", n:"V5Rs", r:"S"}, {b:"Colnago", n:"V4Rs", r:"S"}, {b:"Colnago", n:"C68", r:"S"},
+                // Cannondale
+                {b:"Cannondale", n:"SuperSix EVO Lab71", r:"S"}, {b:"Cannondale", n:"SystemSix Hi-MOD", r:"S"}, {b:"Cannondale", n:"SuperSix EVO Hi-MOD", r:"A"}, {b:"Cannondale", n:"Synapse Carbon", r:"B"}, {b:"Cannondale", n:"CAAD13", r:"B"},
+                // Giant
+                {b:"Giant", n:"Propel Advanced SL 0", r:"S"}, {b:"Giant", n:"TCR Advanced SL 0", r:"S"}, {b:"Giant", n:"Defy Advanced SL", r:"S"}, {b:"Giant", n:"Propel Advanced Pro", r:"A"}, {b:"Giant", n:"TCR Advanced Pro", r:"A"}, {b:"Giant", n:"TCR Advanced", r:"B"}, {b:"Giant", n:"Contend AR", r:"C"},
+                // BMC
+                {b:"BMC", n:"Teammachine SLR01", r:"S"}, {b:"BMC", n:"Timemachine Road", r:"S"}, {b:"BMC", n:"Roadmachine 01", r:"A"}, {b:"BMC", n:"Teammachine SLR", r:"B"}, {b:"BMC", n:"Teammachine ALR", r:"C"},
+                // Scott
+                {b:"Scott", n:"Foil RC Ultimate", r:"S"}, {b:"Scott", n:"Addict RC Ultimate", r:"S"}, {b:"Scott", n:"Foil RC Pro", r:"A"}, {b:"Scott", n:"Addict 10", r:"B"}, {b:"Scott", n:"Speedster 10", r:"C"},
+                // Factor
+                {b:"Factor", n:"ONE", r:"S"}, {b:"Factor", n:"OSTRO VAM", r:"S"}, {b:"Factor", n:"O2 VAM", r:"S"}, {b:"Factor", n:"Hanzo", r:"S"}, {b:"Factor", n:"OSTRO Gravel", r:"A"}, {b:"Factor", n:"O2", r:"B"},
+                // Wilier
+                {b:"Wilier", n:"Filante SLR", r:"S"}, {b:"Wilier", n:"0 SLR", r:"S"}, {b:"Wilier", n:"Rave SLR", r:"A"}, {b:"Wilier", n:"GTR Team", r:"B"}, {b:"Wilier", n:"Montegrappa", r:"C"},
+                // Bianchi
+                {b:"Bianchi", n:"Oltre RC", r:"S"}, {b:"Bianchi", n:"Specialissima RC", r:"S"}, {b:"Bianchi", n:"Aria", r:"B"}, {b:"Bianchi", n:"Via Nirone 7", r:"C"},
+                // Merida
+                {b:"Merida", n:"Reacto Team", r:"S"}, {b:"Merida", n:"Scultura Team", r:"S"}, {b:"Merida", n:"Scultura 5000", r:"B"}, {b:"Merida", n:"Scultura 100", r:"C"},
+                // Look, Argon18, Ridley, Orbea, Lapierre, Time
+                {b:"Look", n:"795 Blade RS", r:"S"}, {b:"Argon18", n:"Nitrogen Disc", r:"S"}, {b:"Ridley", n:"Noah Fast", r:"S"}, {b:"Orbea", n:"Orca OMX", r:"S"}, {b:"Lapierre", n:"Xelius SL", r:"S"}, {b:"Time", n:"Alpe d'Huez 01", r:"S"},
+                // Other Brands
+                {b:"Winspace", n:"T1550 (Aero)", r:"S"}, {b:"Winspace", n:"SLC", r:"S"}, {b:"Winspace", n:"T1500", r:"A"}, {b:"Winspace", n:"G2", r:"B"},
+                {b:"SEKA", n:"Exceed RDC", r:"S"}, {b:"SEKA", n:"Exceed", r:"A"}, {b:"SEKA", n:"Spear", r:"A"},
+                {b:"Evolve", n:"Cima", r:"S"}
+            ],
+        
+            g: [
+                {b:"Shimano", n:"Dura-Ace Di2", r:"S"}, {b:"SRAM", n:"RED AXS", r:"S"}, {b:"Campagnolo", n:"Super Record Wireless", r:"S"},
+                {b:"Shimano", n:"Ultegra Di2", r:"A"}, {b:"SRAM", n:"Force AXS", r:"A"}, {b:"Shimano", n:"105 Di2", r:"B"}, {b:"SRAM", n:"Rival AXS", r:"B"}, {b:"Shimano", n:"105", r:"C"}, {b:"SRAM", n:"Rival", r:"C"}
+            ],
+        
+            w: [
+                // --- S RANK ---
+                {b:"Scope", n:"Artech 2", r:"S"}, {b:"Scope", n:"Artech 4", r:"S"}, {b:"Scope", n:"Artech 6", r:"S"},
+                {b:"Roval", n:"Rapide CLX III", r:"S"}, {b:"Roval", n:"Alpinist CLX III", r:"S"},
+                {b:"Zipp", n:"454 NSW", r:"S"}, {b:"Zipp", n:"353 NSW", r:"S"},
+                {b:"Enve", n:"SES 2.3", r:"S"}, {b:"Enve", n:"SES 3.4", r:"S"}, {b:"Enve", n:"SES 4.5", r:"S"}, {b:"Enve", n:"SES 6.7", r:"S"}, {b:"Enve", n:"PRO 4.5", r:"S"},
+                {b:"Lightweight", n:"Meilenstein Evo", r:"S"}, {b:"Lightweight", n:"Fernweg Evo", r:"S"}, {b:"Lightweight", n:"Obermayer Evo", r:"S"},
+                {b:"Princeton", n:"Wake 6560 Strada", r:"S"}, {b:"Princeton", n:"Wake 7580", r:"S"}, {b:"Princeton", n:"Peak 4550", r:"S"},
+                {b:"Cadex", n:"Max 40", r:"S"}, {b:"Cadex", n:"50 Ultra", r:"S"}, {b:"Cadex", n:"65 Disc", r:"S"},
+                {b:"Shimano", n:"Dura-Ace C36", r:"S"}, {b:"Shimano", n:"Dura-Ace C50", r:"S"}, {b:"Shimano", n:"Dura-Ace C60", r:"S"},
+                {b:"Campagnolo", n:"Bora Ultra WTO 33", r:"S"}, {b:"Campagnolo", n:"Bora Ultra WTO 45", r:"S"}, {b:"Campagnolo", n:"Bora Ultra WTO 60", r:"S"},
+                {b:"Bontrager", n:"Aeolus RSL 37", r:"S"}, {b:"Bontrager", n:"Aeolus RSL 51", r:"S"}, {b:"Bontrager", n:"Aeolus RSL 62", r:"S"},
+                {b:"Reserve", n:"40/44", r:"S"}, {b:"Reserve", n:"52/63", r:"S"}, {b:"Reserve", n:"34/37", r:"S"},
+                {b:"Black Inc", n:"48|58", r:"S"}, {b:"Black Inc", n:"62", r:"S"},
+        
+                // --- A RANK ---
+                {b:"Roval", n:"Rapide CLX II", r:"A"}, {b:"Roval", n:"Alpinist CLX II", r:"A"},
+                {b:"Zipp", n:"404 Firecrest", r:"A"}, {b:"Zipp", n:"303 Firecrest", r:"A"}, {b:"Zipp", n:"808 Firecrest", r:"A"},
+                {b:"Enve", n:"Foundation 45", r:"A"}, {b:"Enve", n:"Foundation 65", r:"A"},
+                {b:"DT Swiss", n:"ARC 1400 DICUT 50", r:"A"}, {b:"DT Swiss", n:"ERC 1400 DICUT", r:"A"}, {b:"DT Swiss", n:"PRC 1400 Spline", r:"A"},
+                {b:"Shimano", n:"Ultegra C36 R8170", r:"A"}, {b:"Shimano", n:"Ultegra C50 R8170", r:"A"}, {b:"Shimano", n:"Ultegra C60 R8170", r:"A"},
+                {b:"Campagnolo", n:"Bora WTO 45", r:"A"}, {b:"Campagnolo", n:"Bora WTO 60", r:"A"},
+                {b:"Bontrager", n:"Aeolus Pro 51", r:"A"}, {b:"Bontrager", n:"Aeolus Pro 37", r:"A"},
+                {b:"Giant", n:"SLR 0 50 Disc", r:"A"}, {b:"Giant", n:"SLR 0 36 Disc", r:"A"},
+                {b:"Vision", n:"Metron 45 SL Disc", r:"A"}, {b:"Vision", n:"Metron 60 SL Disc", r:"A"},
+                {b:"Mavic", n:"Cosmic SLR 45 Disc", r:"A"}, {b:"Mavic", n:"Ksyrium SL Disc", r:"A"},
+                {b:"FFWD", n:"RYOT 55", r:"A"}, {b:"FFWD", n:"RYOT 44", r:"A"},
+                {b:"HED", n:"Vanquish RC4 Performance", r:"A"}, {b:"HED", n:"Vanquish RC6 Performance", r:"A"},
+                {b:"Fulcrum", n:"Speed 42 Disc", r:"A"}, {b:"Fulcrum", n:"Speed 57 Disc", r:"A"},
+                {b:"Vincents", n:"Berg", r:"A"}, {b:"HUNT", n:"50 Carbon Wide Aero", r:"A"},
+        
+                // --- B RANK ---
+                {b:"Roval", n:"Rapide CL II", r:"B"}, {b:"Roval", n:"Alpinist CL II", r:"B"}, {b:"Roval", n:"C38 Disc", r:"B"},
+                {b:"Zipp", n:"303 S Tubeless Disc", r:"B"},
+                {b:"Shimano", n:"105 Carbon C46", r:"B"}, {b:"Shimano", n:"105 Carbon C32", r:"B"},
+                {b:"Bontrager", n:"Aeolus Elite 50", r:"B"}, {b:"Bontrager", n:"Aeolus Elite 35", r:"B"},
+                {b:"Giant", n:"SLR 1 50 Disc", r:"B"}, {b:"Giant", n:"SLR 1 42 Disc", r:"B"},
+                {b:"Fulcrum", n:"Wind 42", r:"B"}, {b:"Fulcrum", n:"Wind 57", r:"B"},
+                {b:"DT Swiss", n:"P1800 Spline 32", r:"B"}, {b:"DT Swiss", n:"ER1600 Spline", r:"B"},
+                {b:"Mavic", n:"Cosmic SL 45 Disc", r:"B"},
+                {b:"Vision", n:"Team 35 Disc", r:"B"}, {b:"Vision", n:"SC 55 Disc", r:"B"}, {b:"Vision", n:"SC 40 Disc", r:"B"},
+                {b:"Campagnolo", n:"Scirocco Disc", r:"B"},
+            ],
+
+            s: ["S-Works Power Mirror", "S-Works Romin Mirror", "Fizik Vento Argo R1", "Fizik Antares Versus", "Selle Italia SLR Boost", "Selle Italia Flite Boost", "Prologo Scratch M5", "Prologo Dimension", "Bontrager Aeolus Pro", "Cadex Boost Carbon", "Giant Fleet SL", "PRO Stealth Performance", "Selle San Marco Shortfit", "Selle SMP Dynamic", "Fabric Scoop Pro", "Syncros Belcarra", "Ergon SR Pro", "Brooks Cambium C13"],
+            t: ["Continental GP5000 S TR", "Continental GP5000 AS TR", "Vittoria Corsa PRO", "Vittoria Corsa Next", "Pirelli P ZERO Race TLR", "Pirelli P ZERO Race RS", "Schwalbe Pro One TLE", "Specialized Turbo Cotton", "Specialized S-Works Turbo", "Bontrager R3 Hard-Case", "Goodyear Eagle F1", "Michelin Power Cup", "Panaracer Agilest TLE", "Veloflex Corsa RACE", "Challenge Strada Bianca", "Pirelli P7 Sport"],
+            p: ["Shimano Dura-Ace PD-R9100", "Shimano Ultegra PD-R8000", "Shimano 105 PD-R7000", "Look Keo Blade Carbon Ti", "Look Keo Classic 3", "Wahoo Speedplay Zero Nano", "Wahoo Speedplay Zero", "Time Xpro 15 Carbon", "Time Xpresso 7", "Garmin Rally RS200 (Power)", "Favero Assioma Duo (Power)", "Shimano PD-RS500"],
+            size: ["25C", "28C", "30C"]
         };
 
-        function run() {
-            const btn = document.querySelector('.btn-draw');
-            const slots = ['f', 'g', 'w'];
-            const cards = ['c1', 'c2', 'c3'];
-            btn.disabled = true;
-            cards.forEach(id => document.getElementById(id).classList.remove('active'));
+        function setBadge(id, rank) {
+            const badge = document.getElementById('r-' + id);
+            if(!badge) return;
+            badge.innerText = rank;
+            badge.className = 'rank-badge rank-' + rank;
+            badge.style.display = 'block';
+        }
 
-            let count = 0;
-            const timer = setInterval(() => {
-                slots.forEach(s => {
-                    const el = document.getElementById(s);
-                    el.innerText = data[s][Math.floor(Math.random()*data[s].length)];
-                    el.classList.add('rolling');
-                });
-                count++;
-                if(count > 25) {
-                    clearInterval(timer);
-                    btn.disabled = false;
-                    slots.forEach(s => document.getElementById(s).classList.remove('rolling'));
-                    cards.forEach(id => document.getElementById(id).classList.add('active'));
-                }
+        function startRolling(id, type) {
+            return setInterval(() => {
+                const randomItem = data[type][Math.floor(Math.random() * data[type].length)];
+                const el = document.getElementById(id === 'rider' ? 'rider' : id === 'frame' ? 'frame' : id === 'wheel' ? 'wheel' : 'group');
+                el.innerHTML = `<span class="brand-text">${randomItem.b}</span><span>${randomItem.n}</span>`;
             }, 60);
         }
+
+        async function finalizeCard(cardId, valId, item) {
+            const card = document.getElementById(cardId);
+            const el = document.getElementById(valId);
+            el.classList.remove('rolling');
+            
+            if (item.r === 'S') {
+                card.classList.add('s-win');
+                el.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center;"><span class="text-S blink-text">RANK: S</span></div>`;
+                await new Promise(r => setTimeout(r, 700));
+                el.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center;"><span class="text-S">RANK: S</span><span class="brand-text" style="color:var(--s-rank)">${item.b}</span></div>`;
+                await new Promise(r => setTimeout(r, 700));
+                el.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center;"><span class="text-S">RANK: S</span><span class="brand-text" style="color:var(--s-rank)">${item.b}</span><span class="text-S">${item.n}</span></div>`;
+            } else {
+                el.innerHTML = `<span class="brand-text">${item.b}</span><span style="color:#eee">[${item.r}] ${item.n}</span>`;
+            }
+            setBadge(valId.charAt(0), item.r);
+        }
+
+        async function run() {
+            const btn = document.querySelector('.btn-draw');
+            btn.disabled = true;
+            
+            document.querySelectorAll('.rank-badge').forEach(e => e.style.display = 'none');
+            document.querySelectorAll('.card').forEach(e => {
+                e.classList.remove('s-win', 'active');
+                e.querySelector('.value').classList.add('rolling');
+            });
+            document.getElementById('total-rank').style.display = 'none';
+
+            const timers = {
+                r: startRolling('rider', 'r'),
+                f: startRolling('frame', 'f'),
+                w: startRolling('wheel', 'w'),
+                g: startRolling('group', 'g')
+            };
+
+            const resR = data.r[Math.floor(Math.random()*data.r.length)];
+            const resF = data.f[Math.floor(Math.random()*data.f.length)];
+            const resW = data.w[Math.floor(Math.random()*data.w.length)];
+            const resG = data.g[Math.floor(Math.random()*data.g.length)];
+
+            await new Promise(r => setTimeout(r, 1500));
+            Object.values(timers).forEach(clearInterval);
+
+            await Promise.all([
+                finalizeCard('card-r', 'rider', resR),
+                finalizeCard('card-f', 'frame', resF),
+                finalizeCard('card-w', 'wheel', resW),
+                finalizeCard('card-g', 'group', resG)
+            ]);
+
+            const scoreMap = { "S": 4, "A": 3, "B": 2 };
+            const avg = (scoreMap[resR.r] + scoreMap[resF.r] + scoreMap[resG.r] + scoreMap[resW.r]) / 4;
+            const finalRank = avg >= 3.7 ? "S" : avg >= 3.0 ? "A" : "B";
+            
+            const rVal = document.getElementById('rank-val');
+            rVal.innerText = finalRank + " CLASS";
+            rVal.style.color = finalRank === 'S' ? "var(--s-rank)" : "#fff";
+            document.getElementById('rank-desc').innerText = finalRank === 'S' ? "🏆 월드투어 최강의 스쿼드!" : "🚴 프로 팀 완성!";
+            document.getElementById('total-rank').style.display = 'block';
+            document.querySelectorAll('.card').forEach(c => c.classList.add('active'));
+            
+            btn.disabled = false;
+        }
+
+        function toggleRoster() {
+            const content = document.getElementById('roster-content');
+            content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
+        }
+
+        function init() {
+            const configs = [{k:'r', l:'list-r', c:'count-r'}, {k:'f', l:'list-f', c:'count-f'}, {k:'w', l:'list-w', c:'count-w'}, {k:'g', l:'list-g', c:'count-g'}];
+            configs.forEach(conf => {
+                document.getElementById(conf.c).innerText = data[conf.k].length;
+                document.getElementById(conf.l).innerHTML = data[conf.k].map(i => `<div class="data-item"><span class="${i.r==='S'?'rank-S-txt':''}">[${i.b}] ${i.n}</span><span>${i.r}</span></div>`).join('');
+            });
+        }
+        window.onload = init;
     </script>
 </body>
 </html>
