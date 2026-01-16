@@ -3,110 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TDF 2025 Pro Rider Draft</title>
+    <title>TDF 2025 Star Draft</title>
     <style>
-        :root { --primary: #ff3e3e; --tdf-yellow: #ffcf40; --s-rank: #ffcf40; --a-rank: #e2e2e2; --b-rank: #cd7f32; }
+        :root { --tdf-yellow: #ffcf40; --star-color: #ffcf40; --premium: #ffffff; }
         body { background: #000; color: white; font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 15px; overflow-x: hidden; }
         
         .header h1 { font-size: 1.6rem; color: var(--tdf-yellow); margin: 20px 0; text-transform: uppercase; font-weight: 900; letter-spacing: -1px; text-shadow: 0 0 10px rgba(255, 207, 64, 0.5); }
 
-        /* 결과 요약 박스 */
         .total-rank-box { margin-bottom: 25px; padding: 15px 30px; border-radius: 20px; background: #1a1a1a; border: 2px solid #333; text-align: center; display: none; width: 100%; max-width: 500px; box-sizing: border-box; }
-        .total-rank-value { font-size: 2.2rem; font-weight: 900; margin-bottom: 5px; font-style: italic; }
-        .total-rank-desc { font-size: 0.95rem; color: var(--tdf-yellow); font-weight: 600; }
+        .total-rank-value { font-size: 2rem; font-weight: 900; margin-bottom: 5px; color: var(--tdf-yellow); }
+        .total-rank-desc { font-size: 0.95rem; color: #aaa; font-weight: 600; }
 
-        /* 4개 카드 그리드 (2x2 구성) */
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 800px; }
-        .card { background: linear-gradient(145deg, #151515, #0a0a0a); border: 2px solid #222; border-radius: 18px; padding: 15px; text-align: center; position: relative; transition: all 0.3s; display: flex; flex-direction: column; justify-content: center; height: 140px; box-sizing: border-box; overflow: hidden; }
+        .card { background: linear-gradient(145deg, #151515, #0a0a0a); border: 2px solid #222; border-radius: 18px; padding: 15px; text-align: center; position: relative; transition: all 0.3s; display: flex; flex-direction: column; justify-content: center; height: 150px; box-sizing: border-box; }
         .card.active { border-color: #444; }
-        .card.s-win { border-color: var(--s-rank); box-shadow: 0 0 30px rgba(255, 207, 64, 0.4); animation: shake 0.4s ease-in-out; }
+        .card.s-win { border-color: var(--tdf-yellow); box-shadow: 0 0 30px rgba(255, 207, 64, 0.3); animation: pulse 1.5s infinite; }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+        @keyframes pulse { 0% { box-shadow: 0 0 20px rgba(255, 207, 64, 0.2); } 50% { box-shadow: 0 0 40px rgba(255, 207, 64, 0.5); } 100% { box-shadow: 0 0 20px rgba(255, 207, 64, 0.2); } }
 
-        .label { font-size: 0.7rem; color: #666; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
-        .brand-text { font-size: 0.75rem; color: #888; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; display: block; }
-        .value { font-size: 1rem; font-weight: 800; line-height: 1.3; color: #fff; word-break: keep-all; min-height: 3em; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .label { font-size: 0.7rem; color: #555; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
+        .brand-text { font-size: 0.75rem; color: #888; font-weight: 600; margin-bottom: 4px; display: block; }
+        .value { font-size: 0.95rem; font-weight: 800; line-height: 1.3; color: #fff; min-height: 3.5em; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-        .rank-badge { position: absolute; top: 12px; right: 12px; font-size: 0.7rem; font-weight: 900; padding: 4px 10px; border-radius: 6px; display: none; z-index: 10; }
+        .star-display { color: var(--star-color); font-size: 0.8rem; margin-top: 5px; letter-spacing: 1px; }
         .rolling { opacity: 0.3; filter: blur(3px); }
-        .text-S { color: var(--s-rank); font-weight: 900; text-shadow: 0 0 10px rgba(255, 207, 64, 0.5); }
-        .blink-text { animation: flash 0.5s infinite alternate; }
-        @keyframes flash { from { opacity: 0.6; } to { opacity: 1; } }
+        .blink-text { animation: flash 0.5s infinite alternate; color: var(--tdf-yellow); }
+        @keyframes flash { from { opacity: 0.5; } to { opacity: 1; } }
 
-        /* 버튼 스타일 */
-        .btn-draw { margin-top: 40px; padding: 20px 100px; font-size: 1.6rem; font-weight: 900; color: #000; background: var(--tdf-yellow); border: none; border-radius: 100px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(255, 207, 64, 0.3); }
-        .btn-draw:hover { transform: scale(1.05); }
-        .btn-draw:disabled { background: #333; color: #666; cursor: not-allowed; box-shadow: none; }
+        .btn-draw { margin-top: 40px; padding: 20px 80px; font-size: 1.5rem; font-weight: 900; color: #000; background: var(--tdf-yellow); border: none; border-radius: 100px; cursor: pointer; transition: 0.3s; }
+        .btn-draw:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-        /* 등급별 색상 */
-        .rank-S { background: var(--s-rank); color: #000; }
-        .rank-A { background: var(--a-rank); color: #000; }
-        .rank-B { background: var(--b-rank); color: #fff; }
-
-        /* 하단 로스터 리스트 */
         .data-viewer { margin-top: 50px; width: 100%; max-width: 1000px; padding: 0 10px; box-sizing: border-box; }
-        .roster-toggle-btn { width: 100%; background: #111; border: 1px solid #333; color: #888; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: 800; display: flex; justify-content: center; align-items: center; }
-        .roster-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #080808; border-radius: 0 0 12px 12px; }
-        .data-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 20px; }
-        .data-column h3 { font-size: 0.8rem; color: var(--tdf-yellow); border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
-        .data-list { font-size: 0.7rem; color: #aaa; max-height: 400px; overflow-y: auto; }
-        .data-item { display: flex; justify-content: space-between; border-bottom: 1px solid #1a1a1a; padding: 6px 0; }
-        .rank-S-txt { color: var(--s-rank); font-weight: bold; }
+        .roster-toggle-btn { width: 100%; background: #111; border: 1px solid #333; color: #888; padding: 15px; border-radius: 12px; cursor: pointer; }
+        .roster-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #080808; }
+        .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; }
+        .data-column h3 { font-size: 0.8rem; color: var(--tdf-yellow); border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .data-list { font-size: 0.75rem; color: #aaa; max-height: 300px; overflow-y: auto; }
+        .data-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #111; }
+        .stars-gold { color: var(--tdf-yellow); }
 
-        @media (max-width: 600px) {
-            .grid { grid-template-columns: 1fr; }
-            .data-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } .data-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="header"><h1>2025 TOUR DE FRANCE DRAFT</h1></div>
+    <div class="header"><h1>TDF 2025 PRO DRAFT</h1></div>
     
     <div id="total-rank" class="total-rank-box">
-        <div class="total-rank-value" id="rank-val">-</div>
-        <div id="rank-desc" class="total-rank-desc">-</div>
+        <div class="total-rank-value" id="rank-val">★★★★★</div>
+        <div id="rank-desc" class="total-rank-desc">최고의 팀이 결성되었습니다!</div>
     </div>
 
     <div class="grid">
-        <div class="card" id="card-r"><div class="rank-badge" id="r-r"></div><div class="label">Pro Rider</div><div class="value" id="rider">---</div></div>
-        <div class="card" id="card-f"><div class="rank-badge" id="r-f"></div><div class="label">Frame</div><div class="value" id="frame">---</div></div>
-        <div class="card" id="card-w"><div class="rank-badge" id="r-w"></div><div class="label">Wheelset</div><div class="value" id="wheel">---</div></div>
-        <div class="card" id="card-g"><div class="rank-badge" id="r-g"></div><div class="label">Groupset</div><div class="value" id="group">---</div></div>
+        <div class="card" id="card-r"><div class="label">Rider</div><div class="value" id="rider">---</div></div>
+        <div class="card" id="card-f"><div class="label">Frame</div><div class="value" id="frame">---</div></div>
+        <div class="card" id="card-w"><div class="label">Wheelset</div><div class="value" id="wheel">---</div></div>
+        <div class="card" id="card-g"><div class="label">Groupset</div><div class="value" id="group">---</div></div>
     </div>
 
-    <button class="btn-draw" onclick="run()">OPEN PACK</button>
+    <button class="btn-draw" onclick="run()">PACK OPEN</button>
 
     <div class="data-viewer">
-        <button class="roster-toggle-btn" onclick="toggleRoster()">VIEW ALL DATABASE</button>
+        <button class="roster-toggle-btn" onclick="toggleRoster()">선수 및 장비 데이터베이스 보기</button>
         <div id="roster-content" class="roster-content">
             <div class="data-grid">
-                <div class="data-column"><h3>RIDERS (<span id="count-r">0</span>)</h3><div id="list-r" class="data-list"></div></div>
-                <div class="data-column"><h3>FRAMES (<span id="count-f">0</span>)</h3><div id="list-f" class="data-list"></div></div>
-                <div class="data-column"><h3>WHEELS (<span id="count-w">0</span>)</h3><div id="list-w" class="data-list"></div></div>
-                <div class="data-column"><h3>GROUPSET (<span id="count-g">0</span>)</h3><div id="list-g" class="data-list"></div></div>
+                <div class="data-column"><h3>RIDERS (TOP 20 TEAMS)</h3><div id="list-r" class="data-list"></div></div>
+                <div class="data-column"><h3>EQUIPMENT (FRAMES/WHEELS)</h3><div id="list-e" class="data-list"></div></div>
             </div>
         </div>
     </div>
 
     <script>
+        const getStars = (num) => "★".repeat(num) + "☆".repeat(5 - num);
+
         
         const data = {
 
-            r: [
-                {b:"UAE Team Emirates", n:"Tadej Pogačar", r:"S"}, {b:"UAE Team Emirates", n:"Adam Yates", r:"A"}, {b:"UAE Team Emirates", n:"João Almeida", r:"A"},
-                {b:"Visma-Lease a Bike", n:"Jonas Vingegaard", r:"S"}, {b:"Visma-Lease a Bike", n:"Matteo Jorgenson", r:"A"}, {b:"Visma-Lease a Bike", n:"Wout van Aert", r:"S"},
-                {b:"Soudal Quick-Step", n:"Remco Evenepoel", r:"S"}, {b:"Soudal Quick-Step", n:"Mikel Landa", r:"A"},
-                {b:"Red Bull-BORA-hansgrohe", n:"Primož Roglič", r:"S"}, {b:"Red Bull-BORA-hansgrohe", n:"Jai Hindley", r:"A"},
-                {b:"INEOS Grenadiers", n:"Carlos Rodriguez", r:"A"}, {b:"INEOS Grenadiers", n:"Tom Pidcock", r:"A"}, {b:"INEOS Grenadiers", n:"Egan Bernal", r:"A"},
-                {b:"Lidl-Trek", n:"Mads Pedersen", r:"A"}, {b:"Lidl-Trek", n:"Tao Geoghegan Hart", r:"A"},
-                {b:"Alpecin-Deceuninck", n:"Mathieu van der Poel", r:"S"}, {b:"Alpecin-Deceuninck", n:"Jasper Philipsen", r:"S"},
-                {b:"EF Education-EasyPost", n:"Richard Carapaz", r:"A"}, {b:"EF Education-EasyPost", n:"Ben Healy", r:"B"},
-                {b:"Groupama-FDJ", n:"David Gaudu", r:"A"}, {b:"Decathlon AG2R", n:"Felix Gall", r:"A"}, {b:"Movistar Team", n:"Enric Mas", r:"A"}
-            ],
+                   r: [
+            // 1. UAE Team Emirates
+            {b:"UAE Team Emirates", n:"Tadej Pogačar", s:5},
+            {b:"UAE Team Emirates", n:"Adam Yates", s:4},
+            {b:"UAE Team Emirates", n:"João Almeida", s:4},
+            {b:"UAE Team Emirates", n:"Juan Ayuso", s:4},
+            {b:"UAE Team Emirates", n:"Isaac Del Toro", s:3},
+        
+            // 2. Visma-Lease a Bike
+            {b:"Visma-Lease a Bike", n:"Jonas Vingegaard", s:5},
+            {b:"Visma-Lease a Bike", n:"Wout van Aert", s:5},
+            {b:"Visma-Lease a Bike", n:"Matteo Jorgenson", s:4},
+            {b:"Visma-Lease a Bike", n:"Sepp Kuss", s:4},
+            {b:"Visma-Lease a Bike", n:"Christophe Laporte", s:4},
+        
+            // 3. Soudal Quick-Step
+            {b:"Soudal Quick-Step", n:"Remco Evenepoel", s:5},
+            {b:"Soudal Quick-Step", n:"Mikel Landa", s:4},
+            {b:"Soudal Quick-Step", n:"Tim Merlier", s:4},
+            {b:"Soudal Quick-Step", n:"Julian Alaphilippe", s:3},
+        
+            // 4. Red Bull-BORA-hansgrohe
+            {b:"Red Bull-BORA-hansgrohe", n:"Primož Roglič", s:5},
+            {b:"Red Bull-BORA-hansgrohe", n:"Jai Hindley", s:4},
+            {b:"Red Bull-BORA-hansgrohe", n:"Aleksandr Vlasov", s:4},
+            {b:"Red Bull-BORA-hansgrohe", n:"Daniel Martínez", s:4},
+        
+            // 5. INEOS Grenadiers
+            {b:"INEOS Grenadiers", n:"Carlos Rodriguez", s:4},
+            {b:"INEOS Grenadiers", n:"Tom Pidcock", s:4},
+            {b:"INEOS Grenadiers", n:"Egan Bernal", s:4},
+            {b:"INEOS Grenadiers", n:"Geraint Thomas", s:3},
+        
+            // 6. Lidl-Trek
+            {b:"Lidl-Trek", n:"Mads Pedersen", s:5},
+            {b:"Lidl-Trek", n:"Mattias Skjelmose", s:4},
+            {b:"Lidl-Trek", n:"Tao Geoghegan Hart", s:4},
+            {b:"Lidl-Trek", n:"Jonathan Milan", s:4},
+        
+            // 7. Alpecin-Deceuninck
+            {b:"Alpecin-Deceuninck", n:"Mathieu van der Poel", s:5},
+            {b:"Alpecin-Deceuninck", n:"Jasper Philipsen", s:5},
+            {b:"Alpecin-Deceuninck", n:"Kaden Groves", s:4},
+        
+            // 8. EF Education-EasyPost
+            {b:"EF Education-EasyPost", n:"Richard Carapaz", s:4},
+            {b:"EF Education-EasyPost", n:"Ben Healy", s:4},
+            {b:"EF Education-EasyPost", n:"Neilson Powless", s:3},
+            {b:"EF Education-EasyPost", n:"Rui Costa", s:3},
+        
+            // 9. Bahrain Victorious
+            {b:"Bahrain Victorious", n:"Pello Bilbao", s:4},
+            {b:"Bahrain Victorious", n:"Santiago Buitrago", s:4},
+            {b:"Bahrain Victorious", n:"Matej Mohorič", s:4},
+            {b:"Bahrain Victorious", n:"Damiano Caruso", s:3},
+        
+            // 10. Movistar Team
+            {b:"Movistar Team", n:"Enric Mas", s:4},
+            {b:"Movistar Team", n:"Nairo Quintana", s:3},
+            {b:"Movistar Team", n:"Einer Rubio", s:3},
+        
+            // 11. Jayco AlUla
+            {b:"Jayco AlUla", n:"Simon Yates", s:4},
+            {b:"Jayco AlUla", n:"Michael Matthews", s:4},
+            {b:"Jayco AlUla", n:"Dylan Groenewegen", s:4},
+        
+            // 12. Decathlon AG2R La Mondiale
+            {b:"Decathlon AG2R", n:"Felix Gall", s:4},
+            {b:"Decathlon AG2R", n:"Ben O'Connor", s:4},
+            {b:"Decathlon AG2R", n:"Victor Lafay", s:3},
+        
+            // 13. Groupama-FDJ
+            {b:"Groupama-FDJ", n:"David Gaudu", s:4},
+            {b:"Groupama-FDJ", n:"Stefan Küng", s:4},
+            {b:"Groupama-FDJ", n:"Romain Grégoire", s:3},
+        
+            // 14. Israel-Premier Tech
+            {b:"Israel-Premier Tech", n:"Derek Gee", s:4},
+            {b:"Israel-Premier Tech", n:"Michael Woods", s:3},
+            {b:"Israel-Premier Tech", n:"Pascal Ackermann", s:3},
+            {b:"Israel-Premier Tech", n:"Stephen Williams", s:3},
+        
+            // 15. Lotto Dstny (Pro Team 에이스들)
+            {b:"Lotto Dstny", n:"Arnaud De Lie", s:4},
+            {b:"Lotto Dstny", n:"Maxim Van Gils", s:4},
+            {b:"Lotto Dstny", n:"Lennert Van Eetvelt", s:4}
+        ],
             f: [
                 // Specialized
                 {b:"Specialized", n:"S-Works Tarmac SL8", r:"S"}, {b:"Specialized", n:"S-Works Aethos", r:"S"}, {b:"Specialized", n:"S-Works Roubaix SL8", r:"S"}, {b:"Specialized", n:"S-Works Shiv TT", r:"S"}, {b:"Specialized", n:"Tarmac SL8 Pro", r:"A"}, {b:"Specialized", n:"Aethos Pro", r:"A"}, {b:"Specialized", n:"Roubaix SL8 Expert", r:"A"}, {b:"Specialized", n:"Allez Sprint", r:"B"}, {b:"Specialized", n:"Allez E5", r:"C"},
@@ -199,84 +257,44 @@
             size: ["25C", "28C", "30C"]
         };
 
-        function setBadge(id, rank) {
-            const badge = document.getElementById('r-' + id);
-            if(!badge) return;
-            badge.innerText = rank;
-            badge.className = 'rank-badge rank-' + rank;
-            badge.style.display = 'block';
-        }
-
         function startRolling(id, type) {
             return setInterval(() => {
-                const randomItem = data[type][Math.floor(Math.random() * data[type].length)];
-                const el = document.getElementById(id === 'rider' ? 'rider' : id === 'frame' ? 'frame' : id === 'wheel' ? 'wheel' : 'group');
-                el.innerHTML = `<span class="brand-text">${randomItem.b}</span><span>${randomItem.n}</span>`;
+                const item = data[type][Math.floor(Math.random() * data[type].length)];
+                document.getElementById(id).innerHTML = `<span class="brand-text">${item.b}</span><span>${item.n}</span><span class="star-display">${getStars(item.s)}</span>`;
             }, 60);
         }
 
-        async function finalizeCard(cardId, valId, item) {
-            const card = document.getElementById(cardId);
+        async function finalize(cardId, valId, item) {
             const el = document.getElementById(valId);
             el.classList.remove('rolling');
-            
-            if (item.r === 'S') {
-                card.classList.add('s-win');
-                el.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center;"><span class="text-S blink-text">RANK: S</span></div>`;
-                await new Promise(r => setTimeout(r, 700));
-                el.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center;"><span class="text-S">RANK: S</span><span class="brand-text" style="color:var(--s-rank)">${item.b}</span></div>`;
-                await new Promise(r => setTimeout(r, 700));
-                el.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center;"><span class="text-S">RANK: S</span><span class="brand-text" style="color:var(--s-rank)">${item.b}</span><span class="text-S">${item.n}</span></div>`;
-            } else {
-                el.innerHTML = `<span class="brand-text">${item.b}</span><span style="color:#eee">[${item.r}] ${item.n}</span>`;
+            if (item.s === 5) {
+                document.getElementById(cardId).classList.add('s-win');
+                el.innerHTML = `<span class="blink-text">★★★★★</span><span class="blink-text">LEGENDARY</span>`;
+                await new Promise(r => setTimeout(r, 600));
             }
-            setBadge(valId.charAt(0), item.r);
+            el.innerHTML = `<span class="brand-text">${item.b}</span><span style="font-weight:900">${item.n}</span><span class="star-display">${getStars(item.s)}</span>`;
         }
 
         async function run() {
             const btn = document.querySelector('.btn-draw');
             btn.disabled = true;
-            
-            document.querySelectorAll('.rank-badge').forEach(e => e.style.display = 'none');
-            document.querySelectorAll('.card').forEach(e => {
-                e.classList.remove('s-win', 'active');
-                e.querySelector('.value').classList.add('rolling');
-            });
+            document.querySelectorAll('.card').forEach(c => { c.classList.remove('s-win'); c.querySelector('.value').classList.add('rolling'); });
             document.getElementById('total-rank').style.display = 'none';
 
-            const timers = {
-                r: startRolling('rider', 'r'),
-                f: startRolling('frame', 'f'),
-                w: startRolling('wheel', 'w'),
-                g: startRolling('group', 'g')
-            };
+            const timers = { r: startRolling('rider', 'r'), f: startRolling('frame', 'f'), w: startRolling('wheel', 'w'), g: startRolling('group', 'g') };
 
-            const resR = data.r[Math.floor(Math.random()*data.r.length)];
-            const resF = data.f[Math.floor(Math.random()*data.f.length)];
-            const resW = data.w[Math.floor(Math.random()*data.w.length)];
-            const resG = data.g[Math.floor(Math.random()*data.g.length)];
+            const res = { r: data.r[Math.floor(Math.random()*data.r.length)], f: data.f[Math.floor(Math.random()*data.f.length)], w: data.w[Math.floor(Math.random()*data.w.length)], g: data.g[Math.floor(Math.random()*data.g.length)] };
 
             await new Promise(r => setTimeout(r, 1500));
             Object.values(timers).forEach(clearInterval);
 
-            await Promise.all([
-                finalizeCard('card-r', 'rider', resR),
-                finalizeCard('card-f', 'frame', resF),
-                finalizeCard('card-w', 'wheel', resW),
-                finalizeCard('card-g', 'group', resG)
-            ]);
+            await Promise.all([ finalize('card-r', 'rider', res.r), finalize('card-f', 'frame', res.f), finalize('card-w', 'wheel', res.w), finalize('card-g', 'group', res.g) ]);
 
-            const scoreMap = { "S": 4, "A": 3, "B": 2 };
-            const avg = (scoreMap[resR.r] + scoreMap[resF.r] + scoreMap[resG.r] + scoreMap[resW.r]) / 4;
-            const finalRank = avg >= 3.7 ? "S" : avg >= 3.0 ? "A" : "B";
-            
-            const rVal = document.getElementById('rank-val');
-            rVal.innerText = finalRank + " CLASS";
-            rVal.style.color = finalRank === 'S' ? "var(--s-rank)" : "#fff";
-            document.getElementById('rank-desc').innerText = finalRank === 'S' ? "🏆 월드투어 최강의 스쿼드!" : "🚴 프로 팀 완성!";
+            const avg = (res.r.s + res.f.s + res.w.s + res.g.s) / 4;
+            const rankVal = document.getElementById('rank-val');
+            rankVal.innerText = getStars(Math.round(avg));
+            document.getElementById('rank-desc').innerText = avg >= 4.5 ? "월드 투어 우승 후보 스쿼드!" : "강력한 프로 팀의 탄생!";
             document.getElementById('total-rank').style.display = 'block';
-            document.querySelectorAll('.card').forEach(c => c.classList.add('active'));
-            
             btn.disabled = false;
         }
 
@@ -286,11 +304,8 @@
         }
 
         function init() {
-            const configs = [{k:'r', l:'list-r', c:'count-r'}, {k:'f', l:'list-f', c:'count-f'}, {k:'w', l:'list-w', c:'count-w'}, {k:'g', l:'list-g', c:'count-g'}];
-            configs.forEach(conf => {
-                document.getElementById(conf.c).innerText = data[conf.k].length;
-                document.getElementById(conf.l).innerHTML = data[conf.k].map(i => `<div class="data-item"><span class="${i.r==='S'?'rank-S-txt':''}">[${i.b}] ${i.n}</span><span>${i.r}</span></div>`).join('');
-            });
+            document.getElementById('list-r').innerHTML = data.r.sort((a,b)=>b.s-a.s).map(i => `<div class="data-item"><span>[${i.b}] ${i.n}</span><span class="stars-gold">${"★".repeat(i.s)}</span></div>`).join('');
+            document.getElementById('list-e').innerHTML = data.f.concat(data.w).sort((a,b)=>b.s-a.s).map(i => `<div class="data-item"><span>[${i.b}] ${i.n}</span><span class="stars-gold">${"★".repeat(i.s)}</span></div>`).join('');
         }
         window.onload = init;
     </script>
