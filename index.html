@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Bike Roster Draft</title>
+    <style>
+        body { background: #0a0a0a; color: white; font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 50px; }
+        h1 { font-size: 3rem; color: #ff3e3e; margin: 0; letter-spacing: -1px; }
+        p { color: #666; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; max-width: 1100px; }
+        .card { background: #151515; border: 1px solid #222; border-radius: 24px; padding: 40px 20px; text-align: center; transition: 0.3s; position: relative; }
+        .card.active { border-color: #ff3e3e; box-shadow: 0 0 20px rgba(255, 62, 62, 0.2); }
+        .label { font-size: 0.75rem; color: #ff3e3e; font-weight: 800; letter-spacing: 2px; margin-bottom: 20px; }
+        .value { font-size: 1.5rem; font-weight: 700; min-height: 100px; display: flex; align-items: center; justify-content: center; line-height: 1.3; transition: 0.1s; }
+        .btn-draw { margin-top: 60px; padding: 22px 80px; font-size: 1.4rem; font-weight: 900; color: white; background: #ff3e3e; border: none; border-radius: 100px; cursor: pointer; transition: 0.3s; }
+        .btn-draw:hover { background: #ff5e5e; transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255, 62, 62, 0.4); }
+        .btn-draw:disabled { background: #333; cursor: not-allowed; transform: none; }
+        .rolling { opacity: 0.5; filter: blur(2px); transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ROSTER DRAFT</h1>
+        <p>당신만의 로드바이크 조합을 생성하세요</p>
+    </div>
+    <div class="grid">
+        <div class="card" id="c1"><div class="label">FRAME</div><div class="value" id="f">---</div></div>
+        <div class="card" id="c2"><div class="label">GROUPSET</div><div class="value" id="g">---</div></div>
+        <div class="card" id="c3"><div class="label">WHEELSET</div><div class="value" id="w">---</div></div>
+    </div>
+    <button class="btn-draw" onclick="run()">DRAFT START</button>
+
+    <script>
+        const data = {
+            f: ["Specialized S-Works Tarmac SL8", "Trek Madone SLR Gen 7", "Canyon Aeroad CFR", "Pinarello Dogma F", "Cervelo S5 V3", "Colnago V4Rs", "Giant Propel Advanced SL", "Cannondale SuperSix EVO", "BMC Teammachine SLR01", "Scott Foil RC", "Factor OSTRO VAM", "Bianchi Oltre RC", "Merida Reacto Team", "Wilier Filante SLR", "Lapierre Aircode DRS", "Look 795 Blade RS", "Argon 18 Nitrogen", "Ridley Noah Fast", "Orbea Orca Aero", "Cervelo R5", "Specialized Aethos", "Trek Emonda SLR", "Giant TCR SL", "Canyon Ultimate CFR", "Colnago C68", "Bianchi Specialissima", "Chapter2 TOA", "Basso Diamante SV", "Pinarello Prince", "Cannondale SystemSix", "BMC Roadmachine", "Scott Addict RC", "Merida Scultura", "Factor O2 VAM", "Enve Melee", "Dare VSRu", "Rose Xlite 06", "Canyon Endurace CF SLX", "Specialized Roubaix SL8", "Trek Domane SLR", "Giant Defy SL"],
+            g: ["Shimano Dura-Ace R9270 Di2", "Shimano Ultegra R8170 Di2", "SRAM RED AXS (2024)", "SRAM Force AXS", "Campagnolo Super Record Wireless", "Shimano Dura-Ace R9170 Di2", "SRAM Red eTap AXS", "Shimano 105 R7170 Di2", "Campagnolo Super Record EPS", "SRAM Rival AXS", "Shimano Ultegra R8070 Di2", "SRAM Force eTap", "Campagnolo Super Record 12s", "Campagnolo Record", "SRAM Red 22"],
+            w: ["Roval Rapide CLX II", "Zipp 454 NSW", "Bora Ultra WTO 45", "Shimano Dura-Ace C50", "ENVE SES 4.5", "Cadex 50 Ultra", "Princeton Wake 6560", "DT Swiss ARC 1100", "Reserve 52/63", "Hunt 54 Aero", "Black Inc Sixty", "Mavic Cosmic SLR 45", "Roval Alpinist CLX", "Zipp 303 Firecrest", "Bora WTO 60", "Vision Metron 60 SL", "FFWD RYOT55", "HED Vanquish RC6", "Aviav Adeon", "FarSports Ventoux S"]
+        };
+
+        function run() {
+            const btn = document.querySelector('.btn-draw');
+            const slots = ['f', 'g', 'w'];
+            const cards = ['c1', 'c2', 'c3'];
+            btn.disabled = true;
+            cards.forEach(id => document.getElementById(id).classList.remove('active'));
+
+            let count = 0;
+            const timer = setInterval(() => {
+                slots.forEach(s => {
+                    const el = document.getElementById(s);
+                    el.innerText = data[s][Math.floor(Math.random()*data[s].length)];
+                    el.classList.add('rolling');
+                });
+                count++;
+                if(count > 25) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    slots.forEach(s => document.getElementById(s).classList.remove('rolling'));
+                    cards.forEach(id => document.getElementById(id).classList.add('active'));
+                }
+            }, 60);
+        }
+    </script>
+</body>
+</html>
